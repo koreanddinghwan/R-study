@@ -22,8 +22,9 @@ mtcars %>%
 # ?dplyr::filter -> 특정 값 가진 데이터 추출
 mtcars %>%
   filter(cyl == 8) %>%
-  arrange(mpg) %>%
-  head(n = 5)
+  arrange(-mpg) %>%
+  tail(n = 5)
+
 
 detach("package:dplyr", unload = TRUE)
 
@@ -137,15 +138,17 @@ df_full
 
 # 4.2. dplyr 패키지의 bind_rows( ) 함수를 사용하여
 #      df_ex1에 df_ex2의 3개 데이터를 추가해보세요.
-
+df_ex1
 df_ex2 <- data.frame(
   name = c("fff", "ggg", "hhh"),
   gen = c("M", "M", "F")
 )
 
 # 칼럼명이 같은 데이터를 위아래로 결합한다.
-df_ex1 <- bind_rows(df_ex2)
-
+df_ex1 <- bind_rows(df_ex1, df_ex2)
+df_ex1
+library(dplyr)
+?bind_rows
 # 4.3. dplyr 패키지의 데이터 결합 함수를 사용하여 아래 데이터프레임으로
 #      파생변수 vs_name을 mtcars에 추가하세요
 
@@ -219,13 +222,14 @@ table(is.na(df_air_copy2$Ozone))
 # 6.2. 변수 Ozone에 대한 박스플랏(상자그림)을 그려 이상치(극단치)가 있는지 확인하고,
 #     어떤 값을 벗어난 값이 이상치(극단치)인지 확인하세요.
 
+library(ggplot2)
 #빈 동그라미 2개가 이상치이다.
 list_box_ozone <- boxplot(df_air_copy$Ozone)
 
 #아래 두 값의 범위에서 벗어난 값은 이상치이다.
 ozone_min <- list_box_ozone$stats[1,]
 ozone_max <- list_box_ozone$stats[5,]
-
+class(ozone_max)
 # 6.3. 변수 Ozone의 모든 이상치(극단치)를 결측치로 바꾸고, 몇 개의 결측치가 추가됐는지 살펴보세요.
 
 # 위에서 구한 범위에서 벗어난 값을 NA로 바꾼다.
