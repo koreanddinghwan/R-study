@@ -401,3 +401,7 @@ df_ms %>%
 			median_sleep_total = median(sleep_total), 
 			max_sleep_total = max(sleep_total),
 			cnt = n())
+
+
+detach("package:ggplot2", unload = TRUE)
+detach("package:dplyr", unload = TRUE)
