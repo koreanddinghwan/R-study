@@ -64,7 +64,8 @@ summary(df_ms)
 #2.1 모든 변수에 대하여 각각 결측치가 있는 변수인지 확인하세요.
 
 #진짜 제발 반복문 제발 제발
-names(df_ms)
+#table(is.na(df_ms))
+#names(df_ms)
 table(is.na(df_ms$name))
 table(is.na(df_ms$genus))
 table(is.na(df_ms$vore))
@@ -83,15 +84,10 @@ table(is.na(df_ms$bodywt))
 #summary(df_ms)
 #name, genus, vore, order, conservation
 
-# 칼럼값에 대해 문자열이 데이터타입이면 결측치를 Unknown으로 바꾸하는 함수
+# 칼럼값에 대해 결측치를 Unknown으로 바꾸하는 함수
 fnc_na_to_unknown <- function(origin) {
-	if (class(origin) != "character") {
-		return(origin)
-	}
-	else {
-		changed <- ifelse(is.na(origin), "Unknown", origin)
-		return(changed)
-	}
+	changed <- ifelse(is.na(origin), "Unknown", origin)
+	return(changed)
 }
 
 df_ms$name <- fnc_na_to_unknown(df_ms$name)
@@ -127,22 +123,20 @@ boxplot(df_ms$bodywt)#존재
 
 #sleep_cycle, sleep_rem
 #결측치 처리 함수 정의
+#boxplot의 
 convert_extreme_na <- function(variable){
-	list_boxplot <- boxplot(variable)
-	value_min <- list_boxplot$stats[1, ]
-	value_max <- list_boxplot$stats[5, ]
+	list_boxplot_stats <- boxplot(variable)$stats
+	value_min <- list_boxplot_stats[1, ]
+	value_max <- list_boxplot_stats[5, ]
 	variable <- ifelse(
 				 variable < value_min | variable > value_max,
-				 NA , variable
-	)
+				 NA, variable)
 	return(variable)
 }
 
-#table(is.na(df_ms$sleep_cycle))
 df_ms$sleep_cycle <- convert_extreme_na(df_ms$sleep_cycle)
 table(is.na(df_ms$sleep_cycle))
 
-#table(is.na(df_ms$sleep_rem))
 df_ms$sleep_rem <- convert_extreme_na(df_ms$sleep_rem)
 table(is.na(df_ms$sleep_rem))
 
@@ -170,6 +164,11 @@ df_ms <- df_ms %>%
     #시간 단위로 되어 있는 변수를 분 단 위 변수로 변경할 때 수식에 유의하도록 하세요
 
 #sleep_rem_min 
+#table(is.na(df_ms$sleep_total))
+#table(is.na(df_ms$sleep_rem))
+#table(is.na(df_ms$sleep_nonrem))
+#시간 -> 분단위 변환 = 시간 * 60
+
 df_ms <- df_ms %>% 
 	mutate(sleep_total_min = ifelse(
 			is.na(df_ms$sleep_total),
@@ -197,6 +196,10 @@ table(df_ms$vore)
 #4.2 잡식동물(omni)의 총수면량(분 단위), 렘수면량(분 단위), 비렘수면량(분 단위)을 
 	#내장함수를 사용하는 방법과 dplyr 패키지 방식을 각각 사용하여 추출해보세요
 
+df_ms[df_ms$vore == "omni",][c("sleep_total_min",
+							   "sleep_rem_min",
+							   "sleep_nonrem_min")]
+
 df_ms %>%
 	filter(vore == "omni") %>%
 	select(sleep_total_min, sleep_rem_min, sleep_nonrem_min)
@@ -206,6 +209,7 @@ df_ms %>%
 
 #sleep_total 결측치 없음.
 #mean 함수를 통해 평균값 계산
+
 mean(df_ms[df_ms$vore == "carni", "sleep_total"])
 mean(df_ms[df_ms$vore == "omni", "sleep_total"])
 mean(df_ms[df_ms$vore == "herbi", "sleep_total"])
@@ -223,10 +227,10 @@ df_ms %>%
 ggplot(
 	data = df_ms %>%
 	group_by(vore) %>%
-	summarise(mean_sleep_total_min = mean(sleep_total_min), 
-	sum_sleep_total_min = sum(sleep_total_min)),
-	   aes(x = reorder(vore, -mean_sleep_total_min),
-			y = sum_sleep_total_min)) + geom_col()
+	summarise(mean_sleep_total_min = mean(sleep_total_min)),
+	aes(x = reorder(vore, -mean_sleep_total_min),
+		y = mean_sleep_total_min)
+	) + geom_col()
 
 
 #5.1 아래의 표는 멸종 위협에 대해서 High와 Low, Non으로 구분한 표입니다.
@@ -284,7 +288,8 @@ df_ms %>%
 ggplot(data = df_ms %>%
 	filter(conservation == "domesticated") %>%
 	select (bodywt, brainwt), 
-	aes(x = bodywt, y = brainwt)) + geom_point()
+	aes(x = bodywt, y = brainwt)
+	) + geom_point()
 
 
 #6.2 몸무게 중 뇌 무게의 백분율을 나타내는 brain_ratio 라는 파생변수를 만들어보세요.
@@ -301,7 +306,7 @@ df_ms <- df_ms %>%
 #7.1 제공된 mammal_theria CSV파일을 불러오세요. 
     #(변수명 일부가 깨져서 나온다면 fileEncoding="UTF-8-BOM" 파라미터를 설정하세요.)
 
-df_mth <- read.csv("mammal_theria.csv")
+df_mth <- read.csv("mammal_theria.csv", header = TRUE)
 
 #7.2 df_ms 데이터에 두 분류 칼럼 theria_main와 theria_sub이 오른쪽에 파생변수로 추가되도록 하세요.
 
@@ -313,13 +318,14 @@ df_ms <- left_join(df_ms, df_mth, by = "order")
     #가장 많은 분류명(order) 을 5개 출력하세요. 
     #이때 상위 5위부터 상위 1위까지 순서로 보여지도록 하세요.
 
+#filter로 조건에 맞는 행 추출, order로 groupby이후, n()으로 groupby함수로 묶인 항목별 갯수 생성, -cnt로 오름차순 정렬 후, 하위5위부터 1위까지 출력 
 df_ms %>%
 	filter(theria_sub == "Laurasiatheria" |
 		   theria_sub == "Euarchontoglires") %>%
 	group_by(order) %>%
 	summarise(cnt = n()) %>%
-	arrange(-cnt) %>%
-	head(n = 5)
+	arrange(cnt) %>%
+	tail(n = 5)
 
 #8.1 총수면량(시간 단위)을 아래와 같이 구분하는 sleep_grade 변수를 추가하세요. 
     #각각 몇 동물씩 있는지 빈도표를 확인해보세요.
@@ -333,6 +339,7 @@ df_ms <- df_ms %>%
 							)
 	)
 
+#table함수로 빈도표 확인
 table(df_ms$sleep_grade)
 
 #8.2 총수면량 중 비렘수면의 백분율을 나타내는 nonrem_ratio 라는 파생변수를 
@@ -355,9 +362,9 @@ View(df_ms)
 #8.3 수면량 등급별 비렘수면 백분율을 막대그래프로 나타내보세요. 
     #이때 막대그래프는 평균이 낮은 순으로 보여지게 하세요.
 
-#geom_col()
+#?geom_col()
 #table(is.na(df_ms$nonrem_ratio))
-
+#group_by sleep_grade해서 nonrem_ration를 mean_nonrem으로 구한다.
 ggplot(
 	data = df_ms %>%
 		group_by(sleep_grade) %>%
@@ -388,20 +395,22 @@ human_brainwt
 #해당 변수별로 총수면량(시 간 단위)의 최소값, 중앙값, 평균, 최대값, 빈도를 출력하세요.
 
 df_ms <- df_ms %>%
-	mutate(brain_grade = ifelse(is.na(df_ms$brain_ratio), NA,
-							ifelse(df_ms$brain_ratio > human_brainwt, "High",
-								ifelse(df_ms$brain_ratio == human_brainwt, "Human", "Low")))
-	)
+	mutate(brain_grade =
+					ifelse(is.na(df_ms$brain_ratio), NA,
+						ifelse(df_ms$brain_ratio > human_brainwt, "High",
+							ifelse(df_ms$brain_ratio == human_brainwt, "Human",
+								"Low")))
+)
 
 df_ms %>%
 	group_by(brain_grade) %>%
 	select(sleep_total) %>%
 	summarise(
 			min_sleep_total = min(sleep_total),
-			median_sleep_total = median(sleep_total), 
+			median_sleep_total = median(sleep_total),
+			mean_sleep_total = mean(sleep_total),
 			max_sleep_total = max(sleep_total),
 			cnt = n())
-
 
 detach("package:ggplot2", unload = TRUE)
 detach("package:dplyr", unload = TRUE)
