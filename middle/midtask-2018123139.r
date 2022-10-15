@@ -43,8 +43,10 @@ names(df_ms)
 #dataframe의 column 값을 알려준다.  총 11개의 칼럼값이 있다.
 
 #display dataset internal structure
+#?str
 #dataframe의 내부 구조를 알려준다. 11개의 변수(column)과 83개의 객체가 있다.
 #column별로 어떤 type의 데이터가 있고, 어떤 값이 들어있는지 보여준다.
+str(df_ms)
 
 #get dataset data dimension
 #?dim
@@ -63,7 +65,6 @@ summary(df_ms)
 
 #2.1 모든 변수에 대하여 각각 결측치가 있는 변수인지 확인하세요.
 
-#진짜 제발 반복문 제발 제발
 #table(is.na(df_ms))
 #names(df_ms)
 table(is.na(df_ms$name))
@@ -123,7 +124,7 @@ boxplot(df_ms$bodywt)#존재
 
 #sleep_cycle, sleep_rem
 #결측치 처리 함수 정의
-#boxplot의 
+#boxplot->stats 사용
 convert_extreme_na <- function(variable){
 	list_boxplot_stats <- boxplot(variable)$stats
 	value_min <- list_boxplot_stats[1, ]

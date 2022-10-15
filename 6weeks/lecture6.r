@@ -120,6 +120,7 @@ ggplot(
 	   aes(x = reorder(Class, -total), y = total)) + geom_col()
 )
 
+?xlim
 df <- data.frame(
 	var1 = c(1,1,1,2,2,3,3,3,3),
 	var2 = c(4,4,5,5,5,5,2,2,2)
@@ -133,6 +134,7 @@ View(diamonds)
 ggplot(data = diamonds, aes(x = cut)) + geom_bar()
 
 ggplot(data = diamonds, aes(x = carat)) + geom_histogram() + xlim(0, 3)
+ggplot(data = diamonds, aes(x = carat)) + geom_histogram()
 
 hist(diamonds$carat)
 
