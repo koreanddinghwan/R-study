@@ -97,7 +97,6 @@ df_ms$vore <- fnc_na_to_unknown(df_ms$vore)
 df_ms$order <- fnc_na_to_unknown(df_ms$order)
 df_ms$conservation <- fnc_na_to_unknown(df_ms$conservation)
 
-#확인
 table(is.na(df_ms$name))
 table(is.na(df_ms$genus))
 table(is.na(df_ms$vore))
@@ -227,8 +226,8 @@ df_ms %>%
 
 ggplot(
 	data = df_ms %>%
-	group_by(vore) %>%
-	summarise(mean_sleep_total_min = mean(sleep_total_min)),
+		group_by(vore) %>%
+		summarise(mean_sleep_total_min = mean(sleep_total_min)),
 	aes(x = reorder(vore, -mean_sleep_total_min),
 		y = mean_sleep_total_min)
 	) + geom_col()
@@ -257,12 +256,13 @@ df_ms
 #table(is.na(df_ms$awake))
 
 df_ms %>%
+	filter(!is.na(risk)) %>%
 	group_by(risk) %>%
 	summarise(mean_awake = mean(awake),
 			  median_awake = median(awake), 
 			  min_awake = min(awake), 
 			  max_awake = max(awake), 
-			  cnt = n()
+			  cnt = n(),
 	)
 
 #5.4 멸종 위기 수준(high/low/non)에 따라 렘수면(분 단위)의 평균, 중앙값, 최소값, 최대값, 빈도를 구해보세요.
@@ -272,6 +272,7 @@ df_ms %>%
 
 #결측치 존재하므로, na.rm = TRUE로 통계
 df_ms %>%
+	filter(!is.na(risk)) %>%
 	group_by(risk) %>%
 	summarise(mean_rem_min = mean(sleep_rem_min, na.rm = TRUE),
 			  median_rem_min = median(sleep_rem_min, na.rm = TRUE),
@@ -298,7 +299,7 @@ ggplot(data = df_ms %>%
 
 #define function to get brain ratio
 get_brain_ratio <- function(brainwt, bodywt) {
-	return (round((brainwt / bodywt) * 100, 2))
+	return (round((brainwt / bodywt) * 100, digit = 2))
 }
 
 df_ms <- df_ms %>%
@@ -404,6 +405,7 @@ df_ms <- df_ms %>%
 )
 
 df_ms %>%
+	filter(!is.na(brain_grade)) %>%
 	group_by(brain_grade) %>%
 	select(sleep_total) %>%
 	summarise(
